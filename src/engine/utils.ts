@@ -1,3 +1,15 @@
+/*
+ * Originally based on:
+ * Copyright (C) 2024 DylanHojnoski
+ * DylanHojnoski/obsidian-graphs
+ * version 1.9.3
+ * 
+ * Modified by Tim-Odermatt in 2026.
+ *
+ * This file is licensed under the GNU GPL v3.0.
+ * See LICENSE for details.
+ */
+
 import {
   Board,
   JSXGraph,
