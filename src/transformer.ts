@@ -55,15 +55,112 @@ const rehypeHeadingClass = (className: string): Plugin<[], HastRoot> => {
   };
 };
 
+
+
+
+const getCodeText = (element: Element): string => {
+  return element.children
+    .map((child) => {
+      if (child.type === "text") {
+        return child.value;
+      }
+
+      if (child.type === "element") {
+        return getCodeText(child);
+      }
+
+      return "";
+    })
+    .join("");
+};
+
+const rehypeGraphBlocks: Plugin<[], HastRoot> = () => {
+  return (tree: HastRoot) => {
+    console.log("[Quartz Graphs] Rehype transformer running");
+
+    visit(tree, "element", (node, index, parent) => {
+      if (node.tagName !== "pre" || !parent || index === undefined) {
+        return;
+      }
+
+      const code = node.children.find(
+        (child): child is Element =>
+          child.type === "element" && child.tagName === "code",
+      );
+
+      if (!code) return;
+
+      const properties = code.properties ?? {};
+      const preProperties = node.properties ?? {};
+
+      // Support both original language classes and Quartz's
+      // syntax-highlighted data-language attributes.
+      const className = properties.className;
+
+      const classList: string[] = Array.isArray(className)
+        ? className.map(String)
+        : [];
+
+      const language = String(
+        Reflect.get(properties, "data-language") ??
+        Reflect.get(properties, "dataLanguage") ??
+        Reflect.get(preProperties, "data-language") ??
+        Reflect.get(preProperties, "dataLanguage") ??
+        "",
+      ).toLowerCase();
+
+      let graphType: string | undefined;
+
+      if (
+        classList.includes("language-graph") ||
+        language === "graph"
+      ) {
+        graphType = "2d";
+      } else if (
+        classList.includes("language-graph3d") ||
+        language === "graph3d"
+      ) {
+        graphType = "3d";
+      }
+
+      if (!graphType) return;
+
+      // Extract YAML even when syntax highlighting has
+      // wrapped individual lines in nested span elements.
+      const source = getCodeText(code);
+
+      console.log("[Quartz Graphs] Graph block detected:", {
+        graphType,
+        source,
+      });
+
+      const graphContainer: Element = {
+        type: "element",
+        tagName: "div",
+        properties: {
+          className: ["quartz-graph"],
+          dataGraphType: graphType,
+          dataGraphSource: source,
+        },
+        children: [],
+      };
+
+      parent.children[index] = graphContainer;
+    });
+  };
+};
+
+
+
 /**
  * Example transformer showing remark/rehype usage and resource injection.
  */
-export const ExampleTransformer: QuartzTransformerPlugin<Partial<ExampleTransformerOptions>> = (
+export const GraphTransformer: QuartzTransformerPlugin<Partial<ExampleTransformerOptions>> = (
   userOptions?: Partial<ExampleTransformerOptions>,
 ) => {
   const options = { ...defaultOptions, ...userOptions };
   return {
-    name: "ExampleTransformer",
+    name: "GraphTransformer",
     textTransform(_ctx: BuildCtx, src: string) {
       return src.endsWith("\n") ? src : `${src}\n`;
     },
@@ -75,7 +172,11 @@ export const ExampleTransformer: QuartzTransformerPlugin<Partial<ExampleTransfor
       return plugins;
     },
     htmlPlugins(): PluggableList {
-      const plugins: PluggableList = [rehypeHeadingClass(options.headingClass)];
+      console.log("[Quartz Graphs] HTML transformer registered");
+      const plugins: PluggableList = [
+        rehypeGraphBlocks,
+        rehypeHeadingClass(options.headingClass),
+      ];
       if (options.addHeadingSlugs) {
         plugins.unshift(rehypeSlug);
       }

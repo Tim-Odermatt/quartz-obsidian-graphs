@@ -68,9 +68,12 @@
   },
   "dependencies": {
     "@quartz-community/types": "file:../types",
-    "@quartz-community/utils": "file:../utils"
+    "@quartz-community/utils": "file:../utils",
+    "jsxgraph": "^1.14.3",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.0",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.10.0",
@@ -93,12 +96,11 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "vitest": "^2.1.9",
-    "@changesets/cli": "^2.29.0"
+    "vitest": "^2.1.9"
   },
   "quartz": {
-    "name": "plugin-template",
-    "displayName": "Plugin Template",
+    "name": "quartz-obsidian-graphs",
+    "displayName": "Quartz Obsidian Graphs",
     "category": "transformer",
     "version": "1.0.0",
     "quartzVersion": ">=5.0.0",
@@ -121,8 +123,14 @@
         "displayName": "Example Component",
         "defaultPosition": "right",
         "defaultPriority": 50
+      },
+      "GraphComponent": {
+        "displayName": "Graph Renderer",
+        "defaultPosition": "right",
+        "defaultPriority": 50
       }
     }
+    
   },
   "engines": {
     "node": ">=22",
