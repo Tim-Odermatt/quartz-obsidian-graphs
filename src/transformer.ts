@@ -76,7 +76,6 @@ const getCodeText = (element: Element): string => {
 
 const rehypeGraphBlocks: Plugin<[], HastRoot> = () => {
   return (tree: HastRoot) => {
-    console.log("[Quartz Graphs] Rehype transformer running");
 
     visit(tree, "element", (node, index, parent) => {
       if (node.tagName !== "pre" || !parent || index === undefined) {
@@ -129,11 +128,6 @@ const rehypeGraphBlocks: Plugin<[], HastRoot> = () => {
       // wrapped individual lines in nested span elements.
       const source = getCodeText(code);
 
-      console.log("[Quartz Graphs] Graph block detected:", {
-        graphType,
-        source,
-      });
-
       const graphContainer: Element = {
         type: "element",
         tagName: "div",
@@ -172,7 +166,6 @@ export const GraphTransformer: QuartzTransformerPlugin<Partial<ExampleTransforme
       return plugins;
     },
     htmlPlugins(): PluggableList {
-      console.log("[Quartz Graphs] HTML transformer registered");
       const plugins: PluggableList = [
         rehypeGraphBlocks,
         rehypeHeadingClass(options.headingClass),
